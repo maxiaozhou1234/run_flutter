@@ -146,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             MaterialButton(
               child: Text(
-                "SecondPage,see more",
+                "More example",
                 style: TextStyle(
                     fontSize: 20,
                     color: Colors.red,

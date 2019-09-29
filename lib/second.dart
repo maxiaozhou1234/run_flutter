@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'list_demo.dart';
 
 class SecondPage extends StatelessWidget {
   @override
@@ -40,6 +41,13 @@ class SecondPage extends StatelessWidget {
               onPressed: () =>
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                 return SwitchAndCheckBoxWidget();
+              })),
+            ),
+            MaterialButton(
+              child: Text("ListView"),
+              onPressed: () =>
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return ListDemo();
               })),
             ),
           ],
@@ -298,5 +306,21 @@ class _SwitchAndCheckBoxWidgetState extends State<SwitchAndCheckBoxWidget> {
             ),
           ],
         ));
+  }
+}
+
+//使用 ListView 加载页面
+class ListViewWidget extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return _ListViewWidgetState();
+  }
+}
+
+class _ListViewWidgetState extends State<ListViewWidget> {
+
+  @override
+  Widget build(BuildContext context) {
+    return null;
   }
 }
