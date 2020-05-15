@@ -1,7 +1,9 @@
 import 'package:english_words/english_words.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
 import 'second.dart';
+import 'module.dart';
 
 void main() => runApp(MyApp());
 
@@ -45,125 +47,184 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-            FlatButton(
-              child: Text("open new route"),
-              textColor: Colors.blue,
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return new MyRoute();
-                }));
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: _dynamicGridView() //_gridView() //_default()
+        );
+  }
+
+  Widget _gridView() {
+    return GridView.count(
+      crossAxisCount: 2,
+      primary: false,
+      padding: const EdgeInsets.all(10),
+      mainAxisSpacing: 10,
+      crossAxisSpacing: 5,
+      children: <Widget>[
+        Container(
+          height: 20,
+          alignment: Alignment.center,
+          child: Text("item"),
+          color: Colors.teal[100],
+        ),
+        Container(
+          height: 20,
+          alignment: Alignment.center,
+          child: Text("item"),
+          color: Colors.teal[200],
+        ),
+        Container(
+          height: 20,
+          alignment: Alignment.center,
+          child: Text("item"),
+          color: Colors.teal[300],
+        )
+      ],
+    );
+  }
+
+  final List<Module> modules = <Module>[
+    Module(widget: MyRoute(), name: 'open new route'),
+    Module(widget: RouterTestRouter(), name: 'open tip route'),
+    Module(widget: RandomWordWidget(), name: 'RandomWord'),
+    Module(widget: ImageWidget(), name: 'Image'),
+    Module(widget: Image2Widget(), name: 'Image2'),
+    Module(widget: CounterWidget(), name: 'lifecycler'),
+    Module(widget: CupertinoRoute(), name: 'Cupertino'),
+    Module(widget: TapboxA(), name: 'TapboxA'),
+    Module(widget: ParentWidget(), name: 'TapboxB'),
+    Module(widget: ParentWidgetC(), name: 'ParentWidgetC'),
+    Module(widget: SecondPage(), name: 'More'),
+  ];
+  final int columnCount = 3;
+
+  Widget _dynamicGridView() {
+    return GridView.builder(
+        padding: EdgeInsets.all(15),
+        itemCount: modules.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisSpacing: 5,
+            crossAxisCount: columnCount,
+            childAspectRatio: 3,
+            mainAxisSpacing: 5),
+        itemBuilder: (BuildContext context, int i) {
+          return GestureDetector(
+              onTap: () {
+                print('on tap: ${modules[i].name}');
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => modules[i].widget));
+              },
+              child: Container(
+                  color: i == modules.length-1
+                      ? Colors.red
+                      : Colors.lightGreen[(i % columnCount + 5) * 100],
+                  alignment: Alignment.center,
+                  child: Text(
+                    modules[i].name,
+                    style: TextStyle(color: Colors.grey[200], fontSize: 16),
+                  )));
+        });
+  }
+
+  Widget _default() {
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'You have pushed the button this many times:',
+            style: Theme.of(context).textTheme.display1,
+          ),
+          FlatButton(
+            child: Text("open new route"),
+            textColor: Colors.blue,
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return new MyRoute();
+              }));
 //              使用注册表进行跳转
 //                Navigator.pushNamed(context, "my_page");
-              },
-            ),
-            FlatButton(
-              child: Text("open tip route"),
-              textColor: Colors.red,
-              onPressed: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
-                  return RouterTestRouter();
-                }));
-              },
-            ),
-            RandomWordWidget(),
-            ImageWidget(),
-            Image2Widget(),
-            Row(
-              children: <Widget>[
-                FlatButton(
-                  textColor: Colors.green,
-                  child: Text("lifecycler", style: TextStyle(fontSize: 14.0)),
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return CounterWidget();
-                    }));
-                  },
-                ),
-                FlatButton(
-                  textColor: Colors.green,
-                  child: Text(
-                    "Cupertino",
-                    style: TextStyle(fontSize: 14.0),
-                  ),
-                  onPressed: () {
-                    Navigator.push(context,
-                        CupertinoPageRoute(builder: (context) {
-                      return CupertinoRoute();
-                    }));
-                  },
-                ),
-                FlatButton(
-                  textColor: Colors.green,
-                  child: Text("TapboxA", style: TextStyle(fontSize: 14.0)),
-                  onPressed: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (context) {
-                    return TapboxA();
-                  })),
-                ),
-                FlatButton(
-                  textColor: Colors.green,
-                  child: Text("TapboxB", style: TextStyle(fontSize: 14.0)),
-                  onPressed: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (context) {
-                    return ParentWidget();
-                  })),
-                ),
-              ],
-            ),
-            MaterialButton(
-              child: Text("ParentWidgetC"),
-              onPressed: () =>
+            },
+          ),
+          FlatButton(
+            child: Text("open tip route"),
+            textColor: Colors.red,
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                return RouterTestRouter();
+              }));
+            },
+          ),
+          RandomWordWidget(),
+          ImageWidget(),
+          Image2Widget(),
+          Row(
+            children: <Widget>[
+              FlatButton(
+                textColor: Colors.green,
+                child: Text("lifecycler", style: TextStyle(fontSize: 14.0)),
+                onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return ParentWidgetC();
-              })),
-            ),
-            MaterialButton(
-              child: Text(
-                "More example",
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.red,
-                    decoration: TextDecoration.underline),
+                    return CounterWidget();
+                  }));
+                },
               ),
-              onPressed: () =>
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return SecondPage();
-              })),
+              FlatButton(
+                textColor: Colors.green,
+                child: Text(
+                  "Cupertino",
+                  style: TextStyle(fontSize: 14.0),
+                ),
+                onPressed: () {
+                  Navigator.push(context,
+                      CupertinoPageRoute(builder: (context) {
+                    return CupertinoRoute();
+                  }));
+                },
+              ),
+              FlatButton(
+                textColor: Colors.green,
+                child: Text("TapboxA", style: TextStyle(fontSize: 14.0)),
+                onPressed: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (context) {
+                  return TapboxA();
+                })),
+              ),
+              FlatButton(
+                textColor: Colors.green,
+                child: Text("TapboxB", style: TextStyle(fontSize: 14.0)),
+                onPressed: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (context) {
+                  return ParentWidget();
+                })),
+              ),
+            ],
+          ),
+          MaterialButton(
+            child: Text("ParentWidgetC"),
+            onPressed: () =>
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return ParentWidgetC();
+            })),
+          ),
+          MaterialButton(
+            child: Text(
+              "More example",
+              style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.red,
+                  decoration: TextDecoration.underline),
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+            onPressed: () =>
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return SecondPage();
+            })),
+          ),
+        ],
       ),
     );
   }

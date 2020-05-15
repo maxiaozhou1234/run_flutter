@@ -29,6 +29,12 @@ void main() {
 
     print('this is dart?');
     sleep(new Duration(seconds: 5));
+
+    int a = 10;
+    var b = 10;
+
+    print('中文输出测试： a == b? ${a == b}');
+
   });
 
   test("stream", () {
