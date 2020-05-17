@@ -1,228 +1,164 @@
-import 'package:english_words/english_words.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:english_words/english_words.dart';
 
-import 'second.dart';
-import 'module.dart';
+//void main() => runApp(FirstApp());
+//void main() => runApp(MaterialApp(
+//      title: 'Second App',
+//      home: SecondScaffold(),
+//    ));
+void main() => runApp(MaterialApp(title: 'TutorialHome', home: TutorialHome()));
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
+class FirstApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+//    return MaterialApp(
+//      title: 'Welcome to Flutter',
+//      theme: ThemeData(
+//        primarySwatch: Colors.blue,
+//      ),
+//      home: Scaffold(
+//        appBar: AppBar(
+//          title: Text('Welcome to Flutter.'),
+//        ),
+//        body: Center(
+//          child: RandomWords(),
+//        ),
+//      ),
+//    );
+
     return MaterialApp(
-      title: 'Flutter Demo',
-//      initialRoute: "/",
-      //显示调试网格
-//      debugShowMaterialGrid: true,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-//      routes: {
-//        "my_page": (context) => MyRoute(),
-//        "tip_page": (context) {
-//          return TipRoute(text: ModalRoute.of(context).settings.arguments);
-//        },
-//        "/": (context) => MyHomePage(title: 'Flutter Demo Home Page'), //注册首页路由
-//      },
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-//      onGenerateRoute: (RouteSettings settings) {
-//        return MaterialPageRoute(builder: (context) {
-//          String routeName = settings.name;
-//          print(routeName);
-//        });
-//      },
+      title: 'Startup Name Generator',
+      theme: ThemeData(primaryColor: Colors.blueAccent),
+      home: RandomWords(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
+class RandomWords extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  createState() => RandomWordsState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class RandomWordsState extends State<RandomWords> {
   @override
   Widget build(BuildContext context) {
+//    final worldPair = WordPair.random();
+//    return Text(worldPair.asPascalCase);
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
-        body: _dynamicGridView() //_gridView() //_default()
-        );
-  }
-
-  Widget _gridView() {
-    return GridView.count(
-      crossAxisCount: 2,
-      primary: false,
-      padding: const EdgeInsets.all(10),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 5,
-      children: <Widget>[
-        Container(
-          height: 20,
-          alignment: Alignment.center,
-          child: Text("item"),
-          color: Colors.teal[100],
-        ),
-        Container(
-          height: 20,
-          alignment: Alignment.center,
-          child: Text("item"),
-          color: Colors.teal[200],
-        ),
-        Container(
-          height: 20,
-          alignment: Alignment.center,
-          child: Text("item"),
-          color: Colors.teal[300],
-        )
-      ],
+      appBar: AppBar(
+        title: Text('Startup Name Generator'),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.list), onPressed: _pushSaved),
+        ],
+      ),
+      body: _buildSuggestions(),
     );
   }
 
-  final List<Module> modules = <Module>[
-    Module(widget: MyRoute(), name: 'open new route'),
-    Module(widget: RouterTestRouter(), name: 'open tip route'),
-    Module(widget: RandomWordWidget(), name: 'RandomWord'),
-    Module(widget: ImageWidget(), name: 'Image'),
-    Module(widget: Image2Widget(), name: 'Image2'),
-    Module(widget: CounterWidget(), name: 'lifecycler'),
-    Module(widget: CupertinoRoute(), name: 'Cupertino'),
-    Module(widget: TapboxA(), name: 'TapboxA'),
-    Module(widget: ParentWidget(), name: 'TapboxB'),
-    Module(widget: ParentWidgetC(), name: 'ParentWidgetC'),
-    Module(widget: SecondPage(), name: 'More'),
-  ];
-  final int columnCount = 3;
+  //下划线前缀标识，强制其变成私有
+  final _suggestions = <WordPair>[];
+  final _biggestFont = const TextStyle(fontSize: 18.0);
+  final _saved = Set<WordPair>();
 
-  Widget _dynamicGridView() {
-    return GridView.builder(
-        padding: EdgeInsets.all(15),
-        itemCount: modules.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisSpacing: 5,
-            crossAxisCount: columnCount,
-            childAspectRatio: 3,
-            mainAxisSpacing: 5),
-        itemBuilder: (BuildContext context, int i) {
-          return GestureDetector(
-              onTap: () {
-                print('on tap: ${modules[i].name}');
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => modules[i].widget));
-              },
-              child: Container(
-                  color: i == modules.length-1
-                      ? Colors.red
-                      : Colors.lightGreen[(i % columnCount + 5) * 100],
-                  alignment: Alignment.center,
-                  child: Text(
-                    modules[i].name,
-                    style: TextStyle(color: Colors.grey[200], fontSize: 16),
-                  )));
-        });
+  Widget _buildSuggestions() {
+    return new ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemBuilder: (context, i) {
+        if (i.isOdd) return Divider();
+        final index = i ~/ 2;
+        if (index >= _suggestions.length) {
+          _suggestions.addAll(generateWordPairs().take(10));
+        }
+        return _buildRow(_suggestions[index]);
+      },
+    );
   }
 
-  Widget _default() {
-    return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'You have pushed the button this many times:',
-            style: Theme.of(context).textTheme.display1,
-          ),
-          FlatButton(
-            child: Text("open new route"),
-            textColor: Colors.blue,
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return new MyRoute();
-              }));
-//              使用注册表进行跳转
-//                Navigator.pushNamed(context, "my_page");
-            },
-          ),
-          FlatButton(
-            child: Text("open tip route"),
-            textColor: Colors.red,
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return RouterTestRouter();
-              }));
-            },
-          ),
-          RandomWordWidget(),
-          ImageWidget(),
-          Image2Widget(),
-          Row(
-            children: <Widget>[
-              FlatButton(
-                textColor: Colors.green,
-                child: Text("lifecycler", style: TextStyle(fontSize: 14.0)),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return CounterWidget();
-                  }));
-                },
-              ),
-              FlatButton(
-                textColor: Colors.green,
-                child: Text(
-                  "Cupertino",
-                  style: TextStyle(fontSize: 14.0),
+  Widget _buildRow(WordPair pair) {
+    final alreadySaved = _saved.contains(pair);
+    return ListTile(
+      title: Text(
+        pair.asPascalCase,
+        style: _biggestFont,
+      ),
+      trailing: Icon(
+        alreadySaved ? Icons.favorite : Icons.favorite_border,
+        color: alreadySaved ? Colors.red : null,
+      ),
+      onTap: () {
+        setState(() {
+          if (alreadySaved) {
+            _saved.remove(pair);
+          } else {
+            _saved.add(pair);
+          }
+        });
+      },
+    );
+  }
+
+  void _pushSaved() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          final titles = _saved.map(
+            (pair) {
+              return ListTile(
+                title: Text(
+                  pair.asPascalCase,
+                  style: _biggestFont,
                 ),
-                onPressed: () {
-                  Navigator.push(context,
-                      CupertinoPageRoute(builder: (context) {
-                    return CupertinoRoute();
-                  }));
-                },
-              ),
-              FlatButton(
-                textColor: Colors.green,
-                child: Text("TapboxA", style: TextStyle(fontSize: 14.0)),
-                onPressed: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (context) {
-                  return TapboxA();
-                })),
-              ),
-              FlatButton(
-                textColor: Colors.green,
-                child: Text("TapboxB", style: TextStyle(fontSize: 14.0)),
-                onPressed: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (context) {
-                  return ParentWidget();
-                })),
-              ),
-            ],
-          ),
-          MaterialButton(
-            child: Text("ParentWidgetC"),
-            onPressed: () =>
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return ParentWidgetC();
-            })),
-          ),
-          MaterialButton(
-            child: Text(
-              "More example",
-              style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.red,
-                  decoration: TextDecoration.underline),
+              );
+            },
+          );
+          final divided = ListTile.divideTiles(
+            context: context,
+            tiles: titles,
+          ).toList();
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Saved Suggestions'),
             ),
-            onPressed: () =>
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return SecondPage();
-            })),
+            body: ListView(children: divided),
+          );
+        },
+      ),
+    );
+  }
+}
+
+//============================
+//自定义 AppBar
+//============================
+class MyAppBar extends StatelessWidget {
+  MyAppBar({this.title});
+
+  final Widget title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 80.0, //56.0,
+//      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.fromLTRB(8.0, 24, 8.0, 0),
+      decoration: BoxDecoration(color: Colors.blue),
+      //水平方向布局
+      child: Row(
+        children: <Widget>[
+          IconButton(
+            icon: Icon(Icons.menu),
+            tooltip: 'Navigation menu',
+            onPressed: null,
+          ),
+          Expanded(
+            child: title,
+          ),
+          IconButton(
+            icon: Icon(Icons.search),
+            tooltip: 'Search',
+            onPressed: null,
           ),
         ],
       ),
@@ -230,419 +166,61 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-//一个简单的路由示例
-class MyRoute extends StatelessWidget {
+class SecondScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("New Route"),
-        ),
-        body: Center(
-          child: Text("This is Reoute page."),
-        ));
-  }
-}
-
-//带返回值的路由
-class TipRoute extends StatelessWidget {
-  TipRoute({
-    Key key,
-    @required this.text, //接收一个参数
-  }) : super(key: key);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("提示"),
-        ),
-        body: Padding(
-            padding: EdgeInsets.all(18),
+    return Material(
+      //垂直方向
+      child: Column(
+        children: <Widget>[
+//          AppBar(
+//            title: Text('default app bar'),
+//            backgroundColor: Colors.green,
+//          ),
+          MyAppBar(
+            title: Text(
+              'Example title',
+              style: Theme.of(context).primaryTextTheme.title,
+            ),
+          ),
+          Expanded(
             child: Center(
-              child: Column(
-                children: <Widget>[
-                  Text(text),
-                  RaisedButton(
-                    onPressed: () => Navigator.pop(context, "我是返回值."),
-                    child: Text("返回"),
-                  )
-                ],
-              ),
-            )));
+              child: Text('Hello World.'),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
-class RouterTestRouter extends StatelessWidget {
+//====================
+//导航 TutorialHome
+//====================
+class TutorialHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("RouterTestRouter"),
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: null,
+          tooltip: 'Navigation Menu',
+        ),
+        title: Text('TutorialHome'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.search),
+            tooltip: 'Search',
+            onPressed: null,
+          ),
+        ],
       ),
       body: Center(
-        child: RaisedButton(
-          onPressed: () async {
-            var result = await Navigator.push(context,
-                MaterialPageRoute(builder: (context) {
-              return TipRoute(
-                text: "我是提示XXX",
-              );
-            }));
-            print("路由返回值：" + result);
-//            使用注册表进行跳转
-//            var rr = await Navigator.pushNamed(context, "tip_page",
-//                arguments: "我是通过注册表传递参数");
-//            print("路由返回值：" + rr);
-          },
-          child: Text("打开提示页"),
-        ),
+        child: Text('Hello TutorialHome!'),
       ),
-    );
-  }
-}
-
-//命名路由参数传递
-class EchoRoute extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var args = ModalRoute.of(context).settings.arguments;
-    return null;
-  }
-}
-
-class RandomWordWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final wordPair = new WordPair.random();
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(wordPair.toString()),
-    );
-  }
-}
-
-//使用 AssetImage 加载图片
-class ImageWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-//    return DecoratedBox(
-//      decoration: BoxDecoration(
-//          image: DecorationImage(
-//              image: AssetImage('graphics/ic_folder.png')
-//          )
-//      ),
-//    );
-    return Image(image: AssetImage('graphics/ic_folder.png'));
-  }
-}
-
-//使用 Image 加载图片
-class Image2Widget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Image.asset('graphics/ic_folder.png');
-  }
-}
-
-//新增加计数控件，用于显示加载生命周期
-class CounterWidget extends StatefulWidget {
-  const CounterWidget({Key key, this.initValue: 0});
-
-  final int initValue;
-
-  @override
-  State<StatefulWidget> createState() {
-    return _CounterWidgetState();
-  }
-}
-
-class _CounterWidgetState extends State<CounterWidget> {
-  int _counter;
-
-  @override
-  void initState() {
-    super.initState();
-    _counter = widget.initValue;
-    print("initState");
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    print("build");
-    return Scaffold(
-        appBar: AppBar(title: Text("CounterWidget")),
-        body: Center(
-          child: Column(
-            children: <Widget>[
-              FlatButton(
-                child: Text("$_counter"),
-                onPressed: () {
-                  setState(() => ++_counter);
-                },
-              ),
-              Builder(builder: (context) {
-                return RaisedButton(
-                  onPressed: () {
-                    ScaffoldState _state = context
-                        .ancestorStateOfType(TypeMatcher<ScaffoldState>());
-                    _state.showSnackBar(SnackBar(
-                      content: Text("我是 SnackBar."),
-                    ));
-                  },
-                  child: Text("显示 SnackBar"),
-                );
-              }),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.email),
-          onPressed: () {},
-        ));
-  }
-
-  @override
-  void didUpdateWidget(CounterWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    print("didUpdateWidget");
-  }
-
-  @override
-  void deactivate() {
-    super.deactivate();
-    print("deactivate");
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    print("dispose");
-  }
-
-  @override
-  void reassemble() {
-    super.reassemble();
-    print("reassemble");
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    print("didChangeDependencies");
-  }
-}
-
-//测试 cupertino  iOS 风格
-class CupertinoRoute extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text("Cupertino Demo"),
-      ),
-      child: Center(
-        child: CupertinoButton(
-            child: Text("Press"),
-            color: CupertinoColors.activeBlue,
-            onPressed: () {}),
-      ),
-    );
-  }
-}
-
-//测试 state 自身管理
-class TapboxA extends StatefulWidget {
-  TapboxA({Key key}) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() {
-    return _TapbaoxAState();
-  }
-}
-
-class _TapbaoxAState extends State<TapboxA> {
-  bool _active = false;
-
-  void _handleTap() {
-    setState(() {
-      _active = !_active;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _handleTap,
-      child: Container(
-        child: Center(
-          child: Text(
-            _active ? 'Active' : 'Inactive',
-            style: TextStyle(fontSize: 32.0, color: Colors.white),
-          ),
-        ),
-        width: 200.0,
-        height: 200.0,
-        decoration: BoxDecoration(
-          color: _active ? Colors.lightGreen[700] : Colors.grey[600],
-        ),
-      ),
-    );
-  }
-}
-
-//测试 state 由父管理
-class ParentWidget extends StatefulWidget {
-  ParentWidget({Key key}) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() {
-    return _ParentWidgetState();
-  }
-}
-
-class _ParentWidgetState extends State<ParentWidget> {
-  bool _active = false;
-
-  void _handleTapboxChanged(bool newValue) {
-    setState(() {
-      _active = newValue;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Container(
-      child: TapboxB(
-        active: _active,
-        onChanged: _handleTapboxChanged,
-      ),
-    );
-  }
-}
-
-class TapboxB extends StatelessWidget {
-  TapboxB({Key key, this.active: false, @required this.onChanged})
-      : super(key: key);
-
-  final bool active;
-  final ValueChanged<bool> onChanged;
-
-  void _handleTap() {
-    onChanged(!active);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _handleTap,
-      child: Container(
-        child: Center(
-          child: Text(
-            active ? 'Active' : 'Inactive',
-            style: TextStyle(fontSize: 30, color: Colors.white),
-          ),
-        ),
-        width: 200.0,
-        height: 200.0,
-        decoration: BoxDecoration(
-          color: active ? Colors.lightGreen[700] : Colors.grey[600],
-        ),
-      ),
-    );
-  }
-}
-
-//测试混合状态管理
-class ParentWidgetC extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return _ParentWidgetCState();
-  }
-}
-
-class _ParentWidgetCState extends State<ParentWidgetC> {
-  bool _active = false;
-
-  void _handleTapboxChanged(bool newValue) {
-    setState(() {
-      _active = newValue;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: TabboxC(
-        active: _active,
-        onChanged: _handleTapboxChanged,
-      ),
-    );
-  }
-}
-
-class TabboxC extends StatefulWidget {
-  TabboxC({Key key, this.active: false, @required this.onChanged})
-      : super(key: key);
-
-  final bool active;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  State<StatefulWidget> createState() {
-    return _TabboxCState();
-  }
-}
-
-class _TabboxCState extends State<TabboxC> {
-  bool _highlight = false;
-
-  void _handleTapDown(TapDownDetails details) {
-    setState(() {
-      _highlight = true;
-    });
-  }
-
-  void _handleTapUp(TapUpDetails details) {
-    setState(() {
-      _highlight = false;
-    });
-  }
-
-  void _handleCancel() {
-    setState(() {
-      _highlight = false;
-    });
-  }
-
-  void _handleTap() {
-    widget.onChanged(!widget.active);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: _handleTapDown,
-      onTapUp: _handleTapUp,
-      onTapCancel: _handleCancel,
-      onTap: _handleTap,
-      child: Container(
-        child: Center(
-          child: Text(
-            widget.active ? 'Active' : 'Inactive',
-            style: TextStyle(fontSize: 32.0, color: Colors.white),
-          ),
-        ),
-        width: 200.0,
-        height: 200.0,
-        decoration: BoxDecoration(
-            color: widget.active ? Colors.lightGreen[700] : Colors.grey[600],
-            border: _highlight
-                ? Border.all(color: Colors.red[700], width: 10.0)
-                : null),
-      ),
+      floatingActionButton: FloatingActionButton(
+          tooltip: 'Add', child: Icon(Icons.add), onPressed: null),
     );
   }
 }
