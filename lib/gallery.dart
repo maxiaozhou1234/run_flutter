@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-//import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
 //相册
@@ -67,9 +68,12 @@ class _GalleryState extends State<Gallery> {
           return GestureDetector(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return Container(
-                    child: Image.file(files[i]),
+                  return ImageContainer(
+                    file: files[i],
                   );
+//                    Container(
+//                    child: Image.file(files[i]),
+//                  );
                 }));
               },
               child: Image.file(
@@ -79,5 +83,93 @@ class _GalleryState extends State<Gallery> {
         },
       ),
     );
+  }
+}
+
+//图片双击缩放
+class ImageContainer extends StatefulWidget {
+  final File file;
+
+  ImageContainer({this.file});
+
+  @override
+  State<StatefulWidget> createState() {
+    return _ImageContainerState();
+  }
+}
+
+class _ImageContainerState extends State<ImageContainer> {
+  double _scale = 1.0;
+  bool _flag = true;
+
+  bool _init = false;
+
+  Widget _loadImage() {
+    final Completer completer = Completer();
+    var size = window.physicalSize;
+    print('screen w = ${size.width},h = ${size.height}');
+    final ImageStream imageStream =
+        FileImage(widget.file).resolve(createLocalImageConfiguration(context));
+
+    ImageStreamListener listener;
+    listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
+      var w = image.image.width;
+      var h = image.image.height;
+
+      var sw = w / size.width;
+      var sh = h / size.height;
+      print('picture (w = $w,h = $h),scale = $sw ,$sh');
+      _scale = (sw > sh ? sw : sh) * 2;
+      print("scale = $_scale");
+      completer.complete();
+      imageStream.removeListener(listener);
+    }, onError: (dynamic exception, StackTrace stackTrace) {
+      print(exception.toString());
+      completer.complete();
+      imageStream.removeListener(listener);
+    });
+
+    imageStream.addListener(listener);
+
+    return FutureBuilder(
+      future: completer.future,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        _init = true;
+        return GestureDetector(
+            onDoubleTap: () {
+              print("onDouble tap");
+              setState(() {
+                _scale = _flag ? _scale / 2.0 : _scale * 2.0;
+                _flag = !_flag;
+                print("onDouble: update $_scale , flag = $_flag");
+              });
+            },
+            child: Image.file(
+              widget.file,
+              fit: BoxFit.none,
+              scale: _scale,
+            ));
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _init
+        ? GestureDetector(
+            onDoubleTap: () {
+              print("onDouble tap");
+              setState(() {
+                _scale = _flag ? _scale / 2.0 : _scale * 2.0;
+                _flag = !_flag;
+                print("onDouble: update $_scale , flag = $_flag");
+              });
+            },
+            child: Image.file(
+              widget.file,
+              fit: BoxFit.none,
+              scale: _scale,
+            ))
+        : _loadImage();
   }
 }

@@ -2,6 +2,7 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'article_main.dart';
 import 'gallery.dart';
 import 'module.dart';
 import 'random_words.dart';
@@ -104,6 +105,9 @@ class _MyHomePageState extends State<MyHomePage> {
     Module(widget: ParentWidgetC(), name: 'ParentWidgetC'),
     Module(widget: Shopping(), name: 'Shopping'),
     Module(widget: Gallery(), name: 'Gallery'),
+    Module(widget: ArticleMain(), name: 'Articles'),
+
+
     Module(widget: SecondPage(), name: 'More'),
   ];
   final int columnCount = 3;

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:photoflutter/model/app_state_model.dart';
 import 'package:provider/provider.dart';
-import 'styles.dart';
+
 import 'page/product_list_tab.dart';
 import 'page/search_tab.dart';
 import 'page/shopping_cart_tab.dart';
